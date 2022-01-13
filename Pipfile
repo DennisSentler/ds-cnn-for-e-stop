@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "==1.19.5"
+tensorflow = "==2.5.0"
+tensorflow-model-optimization = "==0.6.0"
+wave = "*"
+pyaudio = "*"
+matplotlib = "*"
+matplotlib-inline = "*"
+nncase = {path = "./nncase-1.2.0.20211231-cp38-cp38-manylinux_2_24_x86_64.whl"}
+
+[dev-packages]
+ipykernel = "*"
+
+[requires]
+python_version = "3.8"
