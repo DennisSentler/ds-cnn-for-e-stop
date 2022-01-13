@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Test.py",
+            "name": "Debug Test",
             "type": "python",
             "request": "launch",
             "program": "test.py",
@@ -13,6 +13,22 @@
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
                      "--checkpoint", "Pretrained_models/DS_CNN/DS_CNN_L/ckpt/ds_cnn_0.95_ckpt"]
+        },
+        {
+            "name": "Train",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--dct_coefficient_count", "10",
+                     "--window_size_ms", "40",
+                     "--window_stride_ms", "20",
+                     "--learning_rate", "0.0005,0.0001,0.00002",
+                     "--how_many_training_steps", "10000,10000,10000",
+                     "--summaries_dir", "work/DS_CNN/DS_CNN3/retrain_logs",
+                     "--train_dir", "work/DS_CNN/DS_CNN3/training"]
         },
         {
             "name": "Run Inference",
