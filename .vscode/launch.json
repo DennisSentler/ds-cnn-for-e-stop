@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Test.py",
+            "type": "python",
+            "request": "launch",
+            "program": "test.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--checkpoint", "Pretrained_models/DS_CNN/DS_CNN_L/ckpt/ds_cnn_0.95_ckpt"]
+        },
+        {
+            "name": "Run Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--checkpoint", "Pretrained_models/DS_CNN/DS_CNN_L/ckpt/ds_cnn_0.95_ckpt"]
+        },
+        {
+            "name": "Run Test Tflite",
+            "type": "python",
+            "request": "launch",
+            "program": "test_tflite.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--tflite_path", "Pretrained_models/DS_CNN/DS_CNN_L/ds_cnn_l_quantized.tflite"]
+        }
+    ]
+}
