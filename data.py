@@ -285,7 +285,7 @@ class AudioProcessor:
         mfcc = calculate_mfcc(background_clamp, sample_rate, model_settings['window_size_samples'],
                               model_settings['window_stride_samples'],
                               model_settings['dct_coefficient_count'])
-        mfcc = tf.reshape(mfcc, [-1])
+        mfcc = tf.reshape(mfcc, shape=(49,10))
 
         return mfcc, label
 
