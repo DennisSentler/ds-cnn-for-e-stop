@@ -12,11 +12,13 @@
 # limitations under the License.
 """Functions to run inference and test keyword spotting models in tflite format."""
 
+#%%
 import argparse
-
+import tflite_runtime.interpreter as tflite
+#%%
 import tensorflow as tf
 import numpy as np
-
+#%%
 import data
 import models
 from test import calculate_accuracy
@@ -60,7 +62,7 @@ def tflite_inference(input_data, tflite_path):
     Returns:
         Output from inference.
     """
-    interpreter = tf.lite.Interpreter(model_path=tflite_path)
+    interpreter = tflite.Interpreter(model_path=tflite_path)
     interpreter.allocate_tensors()
 
     input_details = interpreter.get_input_details()

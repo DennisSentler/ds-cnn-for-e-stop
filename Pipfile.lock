@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b18191e10ddfa3deefedde9532a9d408671febb15937034c9ebbfe78d8163fe0"
+            "sha256": "98c22f1d7e6c0f5e5cef770add2794174b05a1f28685a96229f4846bbf37d386"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.8"
+            "python_version": "3"
         },
         "sources": [
             {
@@ -588,10 +588,10 @@
         },
         "tensorboard": {
             "hashes": [
-                "sha256:239f78a4a8dff200ce585a030c787773a8c1184d5c159252f5f85bac4e3c3b38"
+                "sha256:65a338e4424e9079f2604923bdbe301792adce2ace1be68da6b3ddf005170def"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2.7.0"
+            "version": "==2.8.0"
         },
         "tensorboard-data-server": {
             "hashes": [
