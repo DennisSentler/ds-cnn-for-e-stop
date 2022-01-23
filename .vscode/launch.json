@@ -48,7 +48,7 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--tflite_path", "work/DS_CNN/DS_CNN3_2D_Input/conversion/ds_cnn.tflite"]
+                     "--tflite_path", "work/DS_CNN/DS_CNN3_2D_Input/conversion/ds_cnn_quantized.tflite"]
         },
         {
             "name": "Convert(ckpt -> tflite)",
