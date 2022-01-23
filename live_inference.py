@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import data as data_processor
 import models
+import sys
+sys.path.insert(0, './e-stop-on-coral')
+import measure
 
 def initAudioStream():
     CHUNK = 1600
@@ -56,6 +59,8 @@ def preProcessAudio(audio):
     return audio_mfcc
 
 def main():
+    clock_preprocessing = measure.InferenceClock(name="preprocessing calc")
+    clock_inference = measure.InferenceClock(name="CPU inference")
     stream = initAudioStream()
     model = loadModel()
 
@@ -83,13 +88,17 @@ def main():
     while True:
         chunk = int(FLAGS.sample_rate/10)
         audio_bytes = bytesToArray(stream.read(chunk)) 
+        clock_preprocessing.start()
         tmp_audio = audio
         tmp_audio.extend(audio_bytes)
         del tmp_audio[:chunk]
         audio = tmp_audio
         #saveDataPlot(fig, audio, "loop%d" % i)
         mfcc = preProcessAudio(audio)
+        clock_preprocessing.stop()
+        clock_inference.start()
         predictions = model(mfcc, training=False).numpy()[0]
+        clock_inference.stop()
         highes_pred = tf.argmax([predictions], axis=1).numpy()[0]
         if predictions[highes_pred] > 0.7:
             print('Prediction: %s, with %dp' % (WORDS[highes_pred], predictions[highes_pred]*100))
