@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Test",
             "type": "python",
@@ -27,8 +28,8 @@
                      "--window_stride_ms", "20",
                      "--learning_rate", "0.0005,0.0001,0.00002",
                      "--how_many_training_steps", "10000,10000,10000",
-                     "--summaries_dir", "work/DS_CNN/DS_CNN3_2D_Input/retrain_logs",
-                     "--train_dir", "work/DS_CNN/DS_CNN3_2D_Input/training"]
+                     "--summaries_dir", "work/DS_CNN/DS_CNN3_v3/retrain_logs",
+                     "--train_dir", "work/DS_CNN/DS_CNN3_v3/training"]
         },
         {
             "name": "Run Inference",

@@ -11,6 +11,8 @@ wave = "*"
 pyaudio = "*"
 matplotlib = "*"
 matplotlib-inline = "*"
+python-speech-features = "*"
+scipy = "*"
 
 [dev-packages]
 ipykernel = "*"
