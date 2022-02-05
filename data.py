@@ -88,10 +88,24 @@ def calculate_mfcc(audio_signal, audio_sample_rate, window_size, window_stride, 
     Returns:
         Calculated mffc features.
     """
-    spectrogram = audio_ops.audio_spectrogram(input=audio_signal, window_size=window_size, stride=window_stride,
-                                              magnitude_squared=True)
+    # spectrogram = audio_ops.audio_spectrogram(input=audio_signal, window_size=window_size, stride=window_stride,
+    #                                           magnitude_squared=True)
 
-    mfcc_features = audio_ops.mfcc(spectrogram, audio_sample_rate, dct_coefficient_count=num_mfcc)
+    # mfcc_features = audio_ops.mfcc(spectrogram, audio_sample_rate, dct_coefficient_count=num_mfcc)
+
+    window_size_in_seconds = window_size/audio_sample_rate
+    window_stride_in_seconds = window_stride/audio_sample_rate
+    mfcc_features = speech_features.mfcc(
+        audio_signal,
+        samplerate=audio_sample_rate,
+        winlen=window_size_in_seconds,
+        winstep=window_stride_in_seconds,
+        numcep=num_mfcc,
+        nfilt=40,
+        lowfreq=20,
+        highfreq=4000,
+        nfft=window_size)
+    mfcc_features = mfcc_features.astype(np.float32)
 
     return mfcc_features
 
@@ -203,12 +217,15 @@ class AudioProcessor:
             ValueError("Incorrect dataset type given")
 
         use_background = (self.background_data is not None) and (mode == AudioProcessor.Modes.TRAINING)
-        dataset = dataset.map(lambda path, label: self._process_path(path, label, self.model_settings,
+        values = dataset[0]
+        labels = dataset[1]
+        values = map(lambda path, label, i: self._process_path(i, path, label, self.model_settings,
                                                                      background_frequency, background_volume_range,
                                                                      time_shift, use_background, self.background_data),
-                              num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-        return dataset
+                              values, labels, range(len(labels)))
+        values = list(values)
+        tf_dataset = tf.data.Dataset.from_tensor_slices((values, labels))
+        return tf_dataset
 
     def set_size(self, mode):
         """Get the number of samples in the requested dataset partition.
@@ -232,7 +249,7 @@ class AudioProcessor:
             ValueError('Incorrect dataset type given')
 
     @staticmethod
-    def _process_path(path, label, model_settings, background_frequency, background_volume_range, time_shift_samples,
+    def _process_path(index, path, label, model_settings, background_frequency, background_volume_range, time_shift_samples,
                       use_background, background_data):
         """Load wav files and calculate mfcc features.
 
@@ -298,23 +315,13 @@ class AudioProcessor:
         background_add = np.add(background_mul, sliced_foreground)
         background_clamp = np.clip(background_add, -1.0, 1.0)
 
-        # mfcc = calculate_mfcc(background_clamp, sample_rate, model_settings['window_size_samples'],
-        #                       model_settings['window_stride_samples'],
-        #                       model_settings['dct_coefficient_count'])
+        mfcc = calculate_mfcc(background_clamp, sample_rate, model_settings['window_size_samples'],
+                              model_settings['window_stride_samples'],
+                              model_settings['dct_coefficient_count'])
         # mfcc = tf.reshape(mfcc, shape=(49,10))
-        window_size_in_seconds = model_settings['window_size_samples']/sample_rate
-        window_stride_in_seconds = model_settings['window_stride_samples']/sample_rate
-        mfcc = speech_features.mfcc(
-            background_clamp.numpy(),
-            samplerate=sample_rate,
-            winlen=window_size_in_seconds,
-            winstep=window_stride_in_seconds,
-            numcep=model_settings['dct_coefficient_count'],
-            nfilt=40,
-            lowfreq=20,
-            highfreq=4000)
-        mfcc = mfcc.astype(np.float32)
-        return mfcc, label
+        if index % 200 == 0:
+            print(f"Sample nr {index} processed.")
+        return mfcc
 
     def _download_and_extract_data(self, data_url, target_directory):
         """Downloads and extracts file to target directory.
@@ -409,7 +416,7 @@ class AudioProcessor:
             # Transform into TF Datasets ready for easier processing later.
             labels, paths = list(zip(*[d.values() for d in data_index[set_index]]))
             labels = [word_to_index[label] for label in labels]
-            self._tf_datasets[set_index] = tf.data.Dataset.from_tensor_slices((list(paths), labels))
+            self._tf_datasets[set_index] = (list(paths), labels)
 
     def _find_and_sort_wavs(self, search_pattern, validation_percentage, testing_percentage, wanted_words_index):
         """Find and sort wav files into known and unknown word sets.

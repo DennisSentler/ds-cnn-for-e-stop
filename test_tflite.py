@@ -22,7 +22,6 @@ import models
 from test import calculate_accuracy
 
 sys.path.insert(0, './e-stop-on-coral')
-import measure
 
 def load_interpreter(tflite_path):
     interpreter = tf.lite.Interpreter(model_path=tflite_path)
@@ -41,15 +40,12 @@ def tflite_test(model_settings, audio_processor, tflite_path):
     """
     interpreter = load_interpreter(tflite_path)
     test_data = audio_processor.get_data(audio_processor.Modes.TESTING).batch(1)
-    clock = measure.InferenceClock()
     expected_indices = np.concatenate([y for x, y in test_data])
     predicted_indices = []
 
     print("Running testing on test set...")
     for mfcc, label in test_data:
-        clock.start()
         prediction = tflite_inference(mfcc, interpreter)
-        clock.stop()
         predicted_indices.append(np.squeeze(tf.argmax(prediction, axis=1)))
 
     test_accuracy = calculate_accuracy(predicted_indices, expected_indices)
@@ -59,7 +55,6 @@ def tflite_test(model_settings, audio_processor, tflite_path):
     print(confusion_matrix.numpy())
     print(f'Test accuracy = {test_accuracy * 100:.2f}%'
           f'(N={audio_processor.set_size(audio_processor.Modes.TESTING)})')
-    print(clock.report())
 
 
 def tflite_inference(input_data, interpreter):

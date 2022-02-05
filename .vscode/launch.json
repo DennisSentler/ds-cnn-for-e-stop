@@ -13,7 +13,7 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--checkpoint", "work/DS_CNN/DS_CNN3/training/best/ds_cnn_0.948_ckpt"]
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt"]
         },
         {
             "name": "Train",
@@ -39,7 +39,7 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--checkpoint", "work/DS_CNN/DS_CNN3_2D_Input/training/best/ds_cnn_0.949_ckpt"]
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt"]
         },
         {
             "name": "Run Test Tflite",
@@ -59,9 +59,8 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--checkpoint", "work/DS_CNN/DS_CNN3_2D_Input/training/best/ds_cnn_0.949_ckpt",
-                     "--quantize",
-                     "--inference_type", "int8"]
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt",
+                     "--quantize"]
         }
     ]
 }
