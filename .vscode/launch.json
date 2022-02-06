@@ -66,7 +66,15 @@
             "name": "Live e-stop-on-coral Inference",
             "type": "python",
             "request": "launch",
-            "program": "e-stop-on-coral/live_inference.py",
+            "program": "e-stop-on-coral/command_detector.py",
+            "console": "integratedTerminal",
+            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite"]
+        },
+        {
+            "name": "CLI monitor",
+            "type": "python",
+            "request": "launch",
+            "program": "e-stop-on-coral/cli_monitor.py",
             "console": "integratedTerminal",
             "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite"]
         }

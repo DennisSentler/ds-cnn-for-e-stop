@@ -13,6 +13,7 @@ matplotlib = "*"
 matplotlib-inline = "*"
 python-speech-features = "*"
 scipy = "*"
+rich = "*"
 
 [dev-packages]
 ipykernel = "*"
