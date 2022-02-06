@@ -61,6 +61,14 @@
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
                      "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt",
                      "--quantize"]
+        },
+        {
+            "name": "Live e-stop-on-coral Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "e-stop-on-coral/live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite"]
         }
     ]
 }
