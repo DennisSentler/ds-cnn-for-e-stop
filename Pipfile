@@ -14,6 +14,7 @@ matplotlib-inline = "*"
 python-speech-features = "*"
 scipy = "*"
 rich = "*"
+pyyaml = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -76,7 +76,8 @@
             "request": "launch",
             "program": "e-stop-on-coral/cli_monitor.py",
             "console": "integratedTerminal",
-            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite"]
+            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite",
+                     "--config", "e-stop-on-coral/config.yaml"]
         }
     ]
 }
