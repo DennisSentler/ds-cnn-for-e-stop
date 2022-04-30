@@ -219,6 +219,5 @@ if __name__ == "__main__":
         nargs="+",
         default=[128, 128, 128],
         help='Model dimensions - different for various models')
-
     FLAGS, _ = parser.parse_known_args()
     train()

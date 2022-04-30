@@ -4,3 +4,4 @@
 */tmp
 **/retrain_logs
 /dataset_as_mfcc
+/work/*
