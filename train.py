@@ -51,11 +51,12 @@ def train():
     model.compile(optimizer=optimizer,
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                   metrics=['accuracy'])
-
+    print("preprocessing training dataset")
     train_data = audio_processor.get_data(audio_processor.Modes.TRAINING,
                                           FLAGS.background_frequency, FLAGS.background_volume,
                                           int((FLAGS.time_shift_ms * FLAGS.sample_rate) / 1000))
     train_data = train_data.repeat().batch(FLAGS.batch_size).prefetch(tf.data.AUTOTUNE)
+    print("preprocessing validation dataset")
     val_data = audio_processor.get_data(audio_processor.Modes.VALIDATION)
     val_data = val_data.batch(FLAGS.batch_size).prefetch(tf.data.AUTOTUNE)
 

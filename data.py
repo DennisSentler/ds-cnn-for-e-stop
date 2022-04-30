@@ -319,8 +319,6 @@ class AudioProcessor:
                               model_settings['window_stride_samples'],
                               model_settings['dct_coefficient_count'])
         # mfcc = tf.reshape(mfcc, shape=(49,10))
-        if index % 200 == 0:
-            print(f"Sample nr {index} processed.")
         return mfcc
 
     def _download_and_extract_data(self, data_url, target_directory):
