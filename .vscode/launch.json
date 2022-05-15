@@ -160,8 +160,8 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "5", "64", "10", "4", "2", "2", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1",
-                     "--checkpoint", "work/DS_CNN/DS_CNN_S_v1_poc_1/training/best/ds_cnn_0.969_ckpt",
-                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--checkpoint", "/home/dsentler/qtApp/models/poc_2/ds_cnn/training/best/ds_cnn_0.943_ckpt",
+                     "--wanted_words", "abbrechen,aus,go,halt,husky,los,stopp,weiter",
                      "--clip_duration_ms", "1500",
                      "--unknown_percentage", "40.0",
                      "--data_dir", "/home/dsentler/synthese_backup/poc_1/"]
@@ -176,6 +176,18 @@
                      "--model_size_info", "5", "64", "10", "4", "2", "2", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1",
                      "--checkpoint", "work/DS_CNN/DS_CNN_S_v1_poc_1/training/best/ds_cnn_0.969_ckpt",
                      "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--clip_duration_ms", "1500"]
+        },
+        {
+            "name": "POC2 DS-CNN-M Run Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "5", "172", "10", "4", "2", "1", "172", "3", "3", "2", "2", "172", "3", "3", "1", "1", "172", "3", "3", "1", "1", "172", "3", "3", "1", "1",
+                     "--checkpoint", "/home/dsentler/qtApp/models/poc2m/ds_cnn/training/best/ds_cnn_0.941_ckpt",
+                     "--wanted_words", "abbrechen,aus,go,halt,husky,los,stopp,weiter",
                      "--clip_duration_ms", "1500"]
         },
     ]
