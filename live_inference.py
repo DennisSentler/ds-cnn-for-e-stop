@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import data as data_processor
 import models
-import sys
-sys.path.insert(0, './e-stop-on-coral')
 
 def initAudioStream():
     CHUNK = int(FLAGS.clip_duration_ms/1000 * FLAGS.sample_rate / 10)

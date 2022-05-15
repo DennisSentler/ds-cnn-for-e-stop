@@ -16,12 +16,10 @@ import argparse
 
 import tensorflow as tf
 import numpy as np
-import sys
 import data
 import models
 from test import calculate_accuracy
 
-sys.path.insert(0, './e-stop-on-coral')
 
 def load_interpreter(tflite_path):
     interpreter = tf.lite.Interpreter(model_path=tflite_path)
