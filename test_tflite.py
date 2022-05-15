@@ -16,11 +16,15 @@ import argparse
 
 import tensorflow as tf
 import numpy as np
-
 import data
 import models
 from test import calculate_accuracy
 
+
+def load_interpreter(tflite_path):
+    interpreter = tf.lite.Interpreter(model_path=tflite_path)
+    interpreter.allocate_tensors()
+    return interpreter
 
 def tflite_test(model_settings, audio_processor, tflite_path):
     """Calculate accuracy and confusion matrices on the test set.
@@ -32,13 +36,14 @@ def tflite_test(model_settings, audio_processor, tflite_path):
         audio_processor: Audio processor class object.
         tflite_path: Path to TFLite file to use for inference.
     """
+    interpreter = load_interpreter(tflite_path)
     test_data = audio_processor.get_data(audio_processor.Modes.TESTING).batch(1)
     expected_indices = np.concatenate([y for x, y in test_data])
     predicted_indices = []
 
     print("Running testing on test set...")
     for mfcc, label in test_data:
-        prediction = tflite_inference(mfcc, tflite_path)
+        prediction = tflite_inference(mfcc, interpreter)
         predicted_indices.append(np.squeeze(tf.argmax(prediction, axis=1)))
 
     test_accuracy = calculate_accuracy(predicted_indices, expected_indices)
@@ -50,19 +55,16 @@ def tflite_test(model_settings, audio_processor, tflite_path):
           f'(N={audio_processor.set_size(audio_processor.Modes.TESTING)})')
 
 
-def tflite_inference(input_data, tflite_path):
+def tflite_inference(input_data, interpreter):
     """Call forwards pass of TFLite file and returns the result.
 
     Args:
         input_data: Input data to use on forward pass.
-        tflite_path: Path to TFLite file to run.
+        interpreter: tflite interpreter for inference
 
     Returns:
         Output from inference.
     """
-    interpreter = tf.lite.Interpreter(model_path=tflite_path)
-    interpreter.allocate_tensors()
-
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--tflite_path',
         type=str,
-        default='Pretrained_models/DS_CNN/DS_CNN_L/ds_cnn_l_quantized.tflite',
+        default='work/DS_CNN/DS_CNN3_2D_Input/conversion/ds_cnn_quantized.tflite',
         help='Path to TFLite file to use for testing.')
     parser.add_argument(
         '--silence_percentage',

@@ -8,9 +8,9 @@ import data as data_processor
 import models
 
 def initAudioStream():
-    CHUNK = 1600
+    CHUNK = int(FLAGS.clip_duration_ms/1000 * FLAGS.sample_rate / 10)
     FORMAT = pyaudio.paInt16
-    SAMPLE_RATE = 16000
+    SAMPLE_RATE = FLAGS.sample_rate
     INPUT_LENGTH_MS = 1000
 
     p = pyaudio.PyAudio()
@@ -49,19 +49,21 @@ def saveDataPlot(figure, data, name):
     
 def preProcessAudio(audio):
     audio_scaled = np.interp(audio, (np.iinfo(np.int16).min, np.iinfo(np.int16).max), (-1, +1))
-    audio_tensor = tf.convert_to_tensor(audio_scaled,  dtype=tf.float32)
-    audio_tensor = tf.reshape(audio_tensor, [16000,1])
-    audio_mfcc = data_processor.calculate_mfcc(audio_tensor, 16000, 640, 320, 10)
-    audio_mfcc = tf.reshape(audio_mfcc, [-1])
+    # audio_tensor = tf.convert_to_tensor(audio_scaled,  dtype=tf.float32)
+    # audio_tensor = tf.reshape(audio_tensor, [16000,1])
+    audio_mfcc = data_processor.calculate_mfcc(audio_scaled, 16000, 640, 320, 10)
+    audio_mfcc = tf.reshape(audio_mfcc, (1,74,10))
     return audio_mfcc
 
 def main():
+    #clock_preprocessing = measure.InferenceClock(name="preprocessing calc")
+    #clock_inference = measure.InferenceClock(name="CPU inference")
     stream = initAudioStream()
     model = loadModel()
 
     # prefill
     audio = []
-    audio_bytes = stream.read(FLAGS.sample_rate)
+    audio_bytes = stream.read(int(FLAGS.sample_rate * FLAGS.clip_duration_ms/1000))
     audio.extend(bytesToArray(audio_bytes))
 
     #saveDataPlot(fig, audio, "testsavefig")
@@ -81,15 +83,19 @@ def main():
     #looping concatination
 
     while True:
-        chunk = int(FLAGS.sample_rate/10)
+        chunk = int(FLAGS.clip_duration_ms/1000 * FLAGS.sample_rate / 10)
         audio_bytes = bytesToArray(stream.read(chunk)) 
+        #clock_preprocessing.start()
         tmp_audio = audio
         tmp_audio.extend(audio_bytes)
         del tmp_audio[:chunk]
         audio = tmp_audio
         #saveDataPlot(fig, audio, "loop%d" % i)
         mfcc = preProcessAudio(audio)
+        # clock_preprocessing.stop()
+        # clock_inference.start()
         predictions = model(mfcc, training=False).numpy()[0]
+        # clock_inference.stop()
         highes_pred = tf.argmax([predictions], axis=1).numpy()[0]
         if predictions[highes_pred] > 0.7:
             print('Prediction: %s, with %dp' % (WORDS[highes_pred], predictions[highes_pred]*100))

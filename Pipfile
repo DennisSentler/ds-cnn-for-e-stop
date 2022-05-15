@@ -11,10 +11,15 @@ wave = "*"
 pyaudio = "*"
 matplotlib = "*"
 matplotlib-inline = "*"
-nncase = {path = "./nncase-1.2.0.20211231-cp38-cp38-manylinux_2_24_x86_64.whl"}
+python-speech-features = "*"
+scipy = "*"
+rich = "*"
+pyyaml = "*"
+termplot = "*"
+uniplot = "*"
 
 [dev-packages]
 ipykernel = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3"

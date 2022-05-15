@@ -4,16 +4,36 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
         {
-            "name": "Debug Test.py",
+            "name": "Test",
             "type": "python",
             "request": "launch",
             "program": "test.py",
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--checkpoint", "Pretrained_models/DS_CNN/DS_CNN_L/ckpt/ds_cnn_0.95_ckpt"]
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt"]
         },
+        
+        {
+            "name": "Train",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--dct_coefficient_count", "10",
+                     "--window_size_ms", "40",
+                     "--window_stride_ms", "20",
+                     "--learning_rate", "0.0005,0.0001,0.00002",
+                     "--how_many_training_steps", "10000,10000,10000",
+                     "--summaries_dir", "work/DS_CNN/DS_CNN3_v3/retrain_logs",
+                     "--train_dir", "work/DS_CNN/DS_CNN3_v3/training"]
+        },
+       
         {
             "name": "Train",
             "type": "python",
@@ -38,8 +58,9 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--checkpoint", "Pretrained_models/DS_CNN/DS_CNN_L/ckpt/ds_cnn_0.95_ckpt"]
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt"]
         },
+        
         {
             "name": "Run Test Tflite",
             "type": "python",
@@ -48,7 +69,142 @@
             "console": "integratedTerminal",
             "args": ["--model_architecture","ds_cnn", 
                      "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
-                     "--tflite_path", "Pretrained_models/DS_CNN/DS_CNN_L/ds_cnn_l_quantized.tflite"]
-        }
+                     "--tflite_path", "work/DS_CNN/DS_CNN3_2D_Input/conversion/ds_cnn_quantized.tflite"]
+        },
+        {
+            "name": "Convert(ckpt -> tflite)",
+            "type": "python",
+            "request": "launch",
+            "program": "convert.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v3/training/best/ds_cnn_0.910_ckpt",
+                     "--quantize"]
+        },
+        {
+            "name": "Live e-stop-on-coral Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "e-stop-on-coral/command_detector.py",
+            "console": "integratedTerminal",
+            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite"]
+        },
+        {
+            "name": "CLI monitor",
+            "type": "python",
+            "request": "launch",
+            "program": "e-stop-on-coral/cli_monitor.py",
+            "console": "integratedTerminal",
+            "args": ["--tflite_path", "e-stop-on-coral/models/ds_cnn_quantized_v3.tflite",
+                     "--audio_plot"]
+        },
+        {
+            "name": "POC1 Train",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--dct_coefficient_count", "10",
+                     "--window_size_ms", "40",
+                     "--window_stride_ms", "20",
+                     "--learning_rate", "0.0005,0.0001,0.00002",
+                     "--how_many_training_steps", "10000,10000,10000",
+                     "--summaries_dir", "work/DS_CNN/DS_CNN3_v3/retrain_logs",
+                     "--train_dir", "work/DS_CNN/DS_CNN3_v4_poc_1/training",
+                     "--time_shift_ms", "0",
+                     "--clip_duration_ms", "1500",
+                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--data_dir", "/home/dsentler/synthese_backup/poc_1/",
+                     "--unknown_percentage", "40.0"]
+        },
+        
+        {
+            "name": "POC1 Test",
+            "type": "python",
+            "request": "launch",
+            "program": "test.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v4_poc_1/training/best/ds_cnn_0.956_ckpt",
+                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--clip_duration_ms", "1500",
+                     "--unknown_percentage", "40.0",
+                     "--data_dir", "/home/dsentler/synthese_backup/poc_1/"]
+        },
+        {
+            "name": "POC1 Run Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "6", "276", "10", "4", "2", "1", "276", "3", "3", "2", "2", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1", "276", "3", "3", "1", "1",
+                     "--checkpoint", "work/DS_CNN/DS_CNN3_v4_poc_1/training/best/ds_cnn_0.956_ckpt",
+                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--clip_duration_ms", "1500"]
+        },
+        {
+            "name": "POC1 DS-CNN-S Train",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "5", "64", "10", "4", "2", "2", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1",
+                     "--dct_coefficient_count", "10",
+                     "--window_size_ms", "40",
+                     "--window_stride_ms", "20",
+                     "--learning_rate", "0.0005,0.0001,0.00002",
+                     "--how_many_training_steps", "10000,10000,10000",
+                     "--summaries_dir", "work/DS_CNN/DS_CNN_S_v1_poc_1/retrain_logs",
+                     "--train_dir", "work/DS_CNN/DS_CNN_S_v1_poc_1/training",
+                     "--time_shift_ms", "0",
+                     "--clip_duration_ms", "1500",
+                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--data_dir", "/home/dsentler/synthese_backup/poc_1/",
+                     "--unknown_percentage", "40.0"]
+        },
+        {
+            "name": "POC1 DS-CNN-S Test",
+            "type": "python",
+            "request": "launch",
+            "program": "test.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "5", "64", "10", "4", "2", "2", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1",
+                     "--checkpoint", "/home/dsentler/qtApp/models/poc_2/ds_cnn/training/best/ds_cnn_0.943_ckpt",
+                     "--wanted_words", "abbrechen,aus,go,halt,husky,los,stopp,weiter",
+                     "--clip_duration_ms", "1500",
+                     "--unknown_percentage", "40.0",
+                     "--data_dir", "/home/dsentler/synthese_backup/poc_1/"]
+        },
+        {
+            "name": "POC1 DS-CNN-S Run Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "5", "64", "10", "4", "2", "2", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1", "64", "3", "3", "1", "1",
+                     "--checkpoint", "work/DS_CNN/DS_CNN_S_v1_poc_1/training/best/ds_cnn_0.969_ckpt",
+                     "--wanted_words", "abbrechen,aus,halt,husky,stopp",
+                     "--clip_duration_ms", "1500"]
+        },
+        {
+            "name": "POC2 DS-CNN-M Run Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "live_inference.py",
+            "console": "integratedTerminal",
+            "args": ["--model_architecture","ds_cnn", 
+                     "--model_size_info", "5", "172", "10", "4", "2", "1", "172", "3", "3", "2", "2", "172", "3", "3", "1", "1", "172", "3", "3", "1", "1", "172", "3", "3", "1", "1",
+                     "--checkpoint", "/home/dsentler/qtApp/models/poc2m/ds_cnn/training/best/ds_cnn_0.941_ckpt",
+                     "--wanted_words", "abbrechen,aus,go,halt,husky,los,stopp,weiter",
+                     "--clip_duration_ms", "1500"]
+        },
     ]
 }

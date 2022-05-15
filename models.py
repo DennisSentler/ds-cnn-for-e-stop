@@ -284,11 +284,12 @@ def create_ds_cnn_model(model_settings, model_size_info):
         conv_sf[layer_no] = model_size_info[i]
         i += 1
 
-    inputs = tf.keras.Input(shape=(model_settings['fingerprint_size']), name='input')
+    #inputs = tf.keras.Input(shape=(model_settings['fingerprint_size']), name='input')
+    inputs = tf.keras.Input(shape=(input_time_size, input_frequency_size), name='input')
 
     # Reshape the flattened input.
     x = tf.reshape(inputs, shape=(-1, input_time_size, input_frequency_size, 1))
-
+    
     # Depthwise separable convolutions.
     for layer_no in range(0, num_layers):
         if layer_no == 0:

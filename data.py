@@ -28,6 +28,8 @@ import hashlib
 import random
 import math
 from enum import Enum
+import python_speech_features as speech_features
+from scipy.io import wavfile
 
 import numpy as np
 import tensorflow as tf
@@ -54,10 +56,23 @@ def load_wav_file(wav_filename, desired_samples):
     Returns:
         Tuple consisting of the decoded audio and sample rate.
     """
-    wav_file = tf.io.read_file(wav_filename)
-    decoded_wav = audio_ops.decode_wav(wav_file, desired_channels=1, desired_samples=desired_samples)
+    sample_rate, wav_file  = wavfile.read(wav_filename)
+    audio = np.interp(wav_file, (np.iinfo(np.int16).min, np.iinfo(np.int16).max), (-1, +1))
 
-    return decoded_wav.audio, decoded_wav.sample_rate
+    if desired_samples != -1:
+        if len(audio) < desired_samples:
+            #padding to desired samples, left and right
+            diff = desired_samples - len(audio)
+            audio = np.pad(audio, (math.floor(diff/2), math.ceil(diff/2)), 'constant', constant_values=0)
+        elif len(audio) > desired_samples: 
+            #cropping to desired samples, left and right
+            diff = len(audio) - desired_samples
+            audio = audio[math.floor(diff/2):math.ceil(diff/2)*-1]
+
+        if len(audio) != desired_samples:
+            raise Exception(f"Padding / cropping of {len(wav_file)} not successfull: {len(audio)} != {desired_samples}")
+
+    return audio, sample_rate
 
 
 def calculate_mfcc(audio_signal, audio_sample_rate, window_size, window_stride, num_mfcc):
@@ -73,10 +88,24 @@ def calculate_mfcc(audio_signal, audio_sample_rate, window_size, window_stride, 
     Returns:
         Calculated mffc features.
     """
-    spectrogram = audio_ops.audio_spectrogram(input=audio_signal, window_size=window_size, stride=window_stride,
-                                              magnitude_squared=True)
+    # spectrogram = audio_ops.audio_spectrogram(input=audio_signal, window_size=window_size, stride=window_stride,
+    #                                           magnitude_squared=True)
 
-    mfcc_features = audio_ops.mfcc(spectrogram, audio_sample_rate, dct_coefficient_count=num_mfcc)
+    # mfcc_features = audio_ops.mfcc(spectrogram, audio_sample_rate, dct_coefficient_count=num_mfcc)
+
+    window_size_in_seconds = window_size/audio_sample_rate
+    window_stride_in_seconds = window_stride/audio_sample_rate
+    mfcc_features = speech_features.mfcc(
+        audio_signal,
+        samplerate=audio_sample_rate,
+        winlen=window_size_in_seconds,
+        winstep=window_stride_in_seconds,
+        numcep=num_mfcc,
+        nfilt=40,
+        lowfreq=20,
+        highfreq=4000,
+        nfft=window_size)
+    mfcc_features = mfcc_features.astype(np.float32)
 
     return mfcc_features
 
@@ -188,12 +217,15 @@ class AudioProcessor:
             ValueError("Incorrect dataset type given")
 
         use_background = (self.background_data is not None) and (mode == AudioProcessor.Modes.TRAINING)
-        dataset = dataset.map(lambda path, label: self._process_path(path, label, self.model_settings,
+        values = dataset[0]
+        labels = dataset[1]
+        values = map(lambda path, label, i: self._process_path(i, path, label, self.model_settings,
                                                                      background_frequency, background_volume_range,
                                                                      time_shift, use_background, self.background_data),
-                              num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-        return dataset
+                              values, labels, range(len(labels)))
+        values = list(values)
+        tf_dataset = tf.data.Dataset.from_tensor_slices((values, labels))
+        return tf_dataset
 
     def set_size(self, mode):
         """Get the number of samples in the requested dataset partition.
@@ -217,7 +249,7 @@ class AudioProcessor:
             ValueError('Incorrect dataset type given')
 
     @staticmethod
-    def _process_path(path, label, model_settings, background_frequency, background_volume_range, time_shift_samples,
+    def _process_path(index, path, label, model_settings, background_frequency, background_volume_range, time_shift_samples,
                       use_background, background_data):
         """Load wav files and calculate mfcc features.
 
@@ -243,51 +275,51 @@ class AudioProcessor:
 
         # Make our own silence audio data.
         if label == SILENCE_INDEX:
-            audio = tf.multiply(audio, 0)
+            audio = np.multiply(audio, 0)
 
         # Shift samples start position and pad any gaps with zeros.
         if time_shift_samples > 0:
-            time_shift_amount = tf.random.uniform(shape=(), minval=-time_shift_samples, maxval=time_shift_samples,
-                                                  dtype=tf.int32)
+            time_shift_amount = np.random.randint(low=-time_shift_samples, high=time_shift_samples,
+                                                  dtype=np.int32)
         else:
             time_shift_amount = 0
         if time_shift_amount > 0:
-            time_shift_padding = [[time_shift_amount, 0], [0, 0]]
-            time_shift_offset = [0, 0]
+            time_shift_padding = [time_shift_amount, 0]
+            time_shift_offset = 0
         else:
-            time_shift_padding = [[0, -time_shift_amount], [0, 0]]
-            time_shift_offset = [-time_shift_amount, 0]
+            time_shift_padding = [0, -time_shift_amount]
+            time_shift_offset = -time_shift_amount
 
-        padded_foreground = tf.pad(audio, time_shift_padding, mode='CONSTANT')
-        sliced_foreground = tf.slice(padded_foreground, time_shift_offset, [desired_samples, -1])
+        padded_foreground = np.pad(audio, time_shift_padding, mode='constant')
+        sliced_foreground = padded_foreground[time_shift_offset:desired_samples+time_shift_offset]
 
         # Get a random section of background noise.
         if use_background:
-            background_index = tf.random.uniform(shape=(), maxval=background_data.shape[0], dtype=tf.int32)
+            background_index = np.random.randint(low=0, high=background_data.shape[0], dtype=np.int32)
             background_sample = background_data[background_index]
-            background_offset = tf.random.uniform(shape=(), maxval=len(background_sample)-desired_samples,
-                                                  dtype=tf.int32)
+            background_offset = np.random.randint(low=0, high=len(background_sample)-desired_samples,
+                                                  dtype=np.int32)
             background_clipped = background_sample[background_offset:(background_offset + desired_samples)]
-            background_reshaped = tf.reshape(background_clipped, [desired_samples, 1])
-            if tf.random.uniform(shape=(), maxval=1) < background_frequency:
-                background_volume = tf.random.uniform(shape=(), maxval=background_volume_range)
+            #background_reshaped = np.reshape(background_clipped, [desired_samples, 1])
+            background_reshaped = background_clipped
+            if np.random.uniform() < background_frequency:
+                background_volume = np.random.uniform(low=0,high=background_volume_range)
             else:
-                background_volume = tf.constant(0, dtype='float32')
+                background_volume = np.float32(0.0)
         else:
-            background_reshaped = np.zeros([desired_samples, 1], dtype=np.float32)
-            background_volume = tf.constant(0, dtype='float32')
+            background_reshaped = np.zeros(desired_samples, dtype=np.float32)
+            background_volume = np.float32(0.0)
 
         # Mix in background noise.
-        background_mul = tf.multiply(background_reshaped, background_volume)
-        background_add = tf.add(background_mul, sliced_foreground)
-        background_clamp = tf.clip_by_value(background_add, -1.0, 1.0)
+        background_mul = np.multiply(background_reshaped, background_volume)
+        background_add = np.add(background_mul, sliced_foreground)
+        background_clamp = np.clip(background_add, -1.0, 1.0)
 
         mfcc = calculate_mfcc(background_clamp, sample_rate, model_settings['window_size_samples'],
                               model_settings['window_stride_samples'],
                               model_settings['dct_coefficient_count'])
-        mfcc = tf.reshape(mfcc, [-1])
-
-        return mfcc, label
+        # mfcc = tf.reshape(mfcc, shape=(49,10))
+        return mfcc
 
     def _download_and_extract_data(self, data_url, target_directory):
         """Downloads and extracts file to target directory.
@@ -382,7 +414,7 @@ class AudioProcessor:
             # Transform into TF Datasets ready for easier processing later.
             labels, paths = list(zip(*[d.values() for d in data_index[set_index]]))
             labels = [word_to_index[label] for label in labels]
-            self._tf_datasets[set_index] = tf.data.Dataset.from_tensor_slices((list(paths), labels))
+            self._tf_datasets[set_index] = (list(paths), labels)
 
     def _find_and_sort_wavs(self, search_pattern, validation_percentage, testing_percentage, wanted_words_index):
         """Find and sort wav files into known and unknown word sets.
@@ -453,10 +485,10 @@ class AudioProcessor:
         search_path = Path(background_dir / '*.wav')
         for wav_path in tf.io.gfile.glob(str(search_path)):
             wav_data, _ = load_wav_file(wav_path, desired_samples=-1)
-            background_data.append(tf.reshape(wav_data, [-1]))
+            background_data.append(np.reshape(wav_data, [-1]))
 
         if not background_data:
             raise Exception('No background wav files were found in ' + str(search_path))
 
         # Ragged tensor as we cant use lists in tf dataset map functions.
-        self.background_data = tf.ragged.stack(background_data)
+        self.background_data = np.array(background_data)
